@@ -1,45 +1,48 @@
-Overview
-========
+This project is an etl pipeline which ingests a csv file /data/voter_data.csv. The pipeline stores raw data, cleans and standardizes staged data, and includes an aggregate layer with some sample calculated metrics.
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+PREQUISITES:
+Astro CLI installed https://www.astronomer.io/docs/astro/cli/install-cli
+Docker desktop
 
-Project Contents
-================
+SETUP:
+Clone the project
+ 
+docker compose -f docker-compose.psql.yaml up -d
 
-Your Astro project contains the following files and folders:
+This will start the postgres container. Note that astro uses a psql instance for metadata on port 5432, so we use 5433 here (can be configured in docker-compose.psql.yaml)
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes one example DAG:
-    - `example_astronauts`: This DAG shows a simple ETL pipeline example that queries the list of astronauts currently in space from the Open Notify API and prints a statement for each astronaut. The DAG uses the TaskFlow API to define tasks in Python, and dynamic task mapping to dynamically print a statement for each astronaut. For more on how this DAG works, see our [Getting started tutorial](https://www.astronomer.io/docs/learn/get-started-with-airflow).
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+astro dev start
 
-Deploy Your Project Locally
-===========================
+This will start the containers used by astro
 
-Start Airflow on your local machine by running 'astro dev start'.
+Open Airflow UI at http://localhost:8080 with default credentials (user: admin/ pass: admin)
 
-This command will spin up five Docker containers on your machine, each for a different Airflow component:
+Navigate to Admin -> connections
 
-- Postgres: Airflow's Metadata Database
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- DAG Processor: The Airflow component responsible for parsing DAGs
-- API Server: The Airflow component responsible for serving the Airflow UI and API
-- Triggerer: The Airflow component responsible for triggering deferred tasks
+Add a connection with these values
+connection ID: dbt_postgres_connection
+host: host.docker.internal
+port: 5433
+database: main
+login: postgres
+password: postgres
 
-When all five containers are ready the command will open the browser to the Airflow UI at http://localhost:8080/. You should also be able to access your Postgres Database at 'localhost:5432/postgres' with username 'postgres' and password 'postgres'.
+You can now navigate to DAGS and see the two jobs:
 
-Note: If you already have either of the above ports allocated, you can either [stop your existing Docker containers or change the port](https://www.astronomer.io/docs/astro/cli/troubleshoot-locally#ports-are-not-available-for-my-local-airflow-webserver).
+load_csv_to_postgres will load and replace data from /data/voter_data.csv into public.main.raw_voter_data
 
-Deploy Your Project to Astronomer
-=================================
+dag_to_run_dbt will incrementally load data from raw_voter_data to stage and mart layers, performing validation checks and writing rows that fail validation to stg_voter_data_errors.
 
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://www.astronomer.io/docs/astro/deploy-code/
+The data can be inspected from our postgres container through the docker desktop application, or through terminal with
 
-Contact
-=======
+docker exec -it dbt_postgres bash
 
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
+psql -U postgres -d main
+
+select * from table;
+
+Stopping containers:
+To stop the airflow containers, simply astro dev stop
+
+To stop the postgres container, docker-compose -f docker-compose.psql.yaml down
+
