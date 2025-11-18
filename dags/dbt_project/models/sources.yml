@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw_postgres  # This is just a group name
+    # This points to your Postgres 'main' database
+    database: main 
+    # Your pandas script loads to the 'public' schema by default
+    schema: public 
+    tables:
+      - name: raw_voter_data # This MUST match your table name

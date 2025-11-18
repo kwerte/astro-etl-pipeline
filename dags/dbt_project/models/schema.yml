@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: stg_clean_voter_data
+    description: "Cleansed and standardized voter registration data."
+    columns:
+      - name: voter_id
+        description: "The unique identifier for a voter."
+        tests:
+          - not_null:
+              severity: error
+          - unique:
+              severity: error
+      
+      - name: age
+        description: "Voter's age."
+        tests:
+          - not_null:
+              severity: warn 
+          # We moved the >18 check to a singular test file (see below)
+
+      - name: state_code
+        description: "Standardized 2-letter state code."
+        tests:
+          - not_null:
+              severity: warn
+
+      - name: political_party
+        description: "Standardized political party."
+        tests:
+          - not_null:
+              severity: warn
+
+      - name: email
+        description: "Standardized, lowercased email address."
+        tests:
+          - not_null
+          - unique
+
+      - name: registered_at_date
+        description: "The date the voter registered."
+        tests:
+          - not_null

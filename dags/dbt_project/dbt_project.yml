@@ -1,0 +1,9 @@
+name: 'goodparty_pipeline'
+version: '1.0.0'
+config-version: 2
+
+# This is the profile dbt will use.
+# Cosmos will generate the actual connection details from our Airflow Connection.
+profile: 'goodparty'
+
+models:

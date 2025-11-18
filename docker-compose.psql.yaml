@@ -1,0 +1,15 @@
+services:
+  postgres-db:
+    image: postgres:16
+    container_name: dbt_postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=main
+    ports:
+      - "5433:5432" # Expose port 5432 to your host machine
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
