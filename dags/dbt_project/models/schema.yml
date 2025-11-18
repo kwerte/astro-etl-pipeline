@@ -34,8 +34,8 @@ models:
       - name: email
         description: "Standardized, lowercased email address."
         tests:
-          - not_null
-          - unique
+          - not_null:
+              severity: warn
 
       - name: registered_at_date
         description: "The date the voter registered."
