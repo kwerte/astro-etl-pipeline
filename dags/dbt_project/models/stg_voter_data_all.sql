@@ -1,10 +1,9 @@
--- This model will be created as a TABLE in your 'dbt_output' schema
 {{
   config(
     materialized='ephemeral'
   )
 }}
-
+--temporary staging table to separate good and bad data
 select
     -- Rename, trim whitespace, and standardize case
     "id" as voter_id,
@@ -15,7 +14,7 @@ select
     "age"::integer as age,
     "gender" as gender,
     upper(trim("state")) as state_code,
-    initcap(trim("party")) as political_party, -- 'Independent'
+    initcap(trim("party")) as political_party, 
     lower(trim("email")) as email,
     "registered_date"::date as registered_at_date,
     "last_voted_date"::date as last_voted_at_date,
